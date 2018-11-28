@@ -1,30 +1,29 @@
 ---
 layout: post
 title: Google C++ Style Guide is No Good
-date: '2018-11-06T20:59:00.000-07:00'
+date: '2018-11-28T00:59:00.000-07:00'
 author: Eugene Yakubovich
 tags:
 - C++
-modified_time: '2018-10-23T20:59:46.484-07:00'
 ---
 
-The [Google Style Guide (GSG)](https://google.github.io/styleguide/cppguide.html) for C++ has become popular outside of Google.
+The [Google Style Guide (GSG)](https://google.github.io/styleguide/cppguide.html) for C++ has become popular outside of just Google.
 But I don't like it at all. There... I said it.
-I want to take this opportunity to explain why I feel so strongly about it.
+Now I want to take this opportunity to explain why I feel so strongly about it.
 
 ## GSG "style"
 The general observation is that the style guide is written in a prohibitive fashion.
-Unlike C++ Core Guidelines that try to explain how to use the language effectively, GSG is about forbidding the use of certain features.
+Unlike [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines) that try to explain how to use the language effectively, GSG is about forbidding the use of certain features.
 Many of the rules prohibit the use of a feature over the fear of confusion, abuse, ambiguity and bugs.
-It is a well known fact that every feature (in every language) can be abused and misunderstood.
+Every feature (in every language) can be abused and misunderstood.
 Every line of code (and feature) can be a source of bugs.
 At the same time, every feature that went into the language was vetted for being useful.
-It was deemed that without the said feature, the code was significantly worse (e.g more verbose, prone to bugs).
+It was deemed that without the said feature, the code was significantly worse (e.g. more verbose, prone to bugs).
 Therefore prohiting the use of some language feature just invites these problems into the codebase.
 Additionaly the GSG prohibits constructs that are widely used in well-known codebases: stdlib implementations, Boost, cppreference.com examples, etc.
 
-GSG is also concerned about some construct not being known to newcomers or even experienced C++ developers and outlaws such constructs based on these fears.
-But how will developers learn new features if not from reading code that uses them?
+GSG is also concerned about features not being known to newcomers or even experienced C++ developers and outlaws them based on such fears.
+But how will developers learn new features if not from seeing code that uses them?
 Lastly, simple APIs often require complex implementations.
 Consider, for example, the following simple code snippet:
 
@@ -37,8 +36,8 @@ std::advance(it, 5);
 {% endraw %}
 {% endhighlight %}
 
-The above snippet invokes code paths that use constructs like `std::uninitialized_fill` (which uses placement new), `std::move_if_noexcept` (which uses SFINAE), implementation of random access iterator and tag dispatching.
-Nevertheless, the API that is exposed is easy to use and understood by the beginner.
+These few lines invoke code paths that use constructs like `std::uninitialized_fill` (which uses placement new), `std::move_if_noexcept` (which uses SFINAE), implementation of random access iterator and tag dispatching.
+None of these are simple constructs, nevertheless, the API that is exposed is easy to use and understood by the beginner.
 
 I can already hear an argument that there's a difference between "library writers" and "everyone else".
 Maybe GSG should be waived for "library writers" who are expected to be language experts.
@@ -101,11 +100,11 @@ However the guide fails to mention that:
 - Inline functions are useful for header-only libraries.
 
 ### [Namespaces](https://google.github.io/styleguide/cppguide.html#Namespaces)
-GSG says "With few exceptions, place code in a namespace.".
+GSG says "With few exceptions, place code in a namespace".
 It does not specify which exceptions.
 
 Namespaces are there to prevent collisions.
-Library code should always be placed into a namespace.
+Library code should always be placed in a namespace.
 Top level/application code has questionable value being placed in a namespace.
 It is the code that is importing libraries and can trivially avoid name conflicts (even if names clash):
 
@@ -182,7 +181,7 @@ I would urge the reader to consider what life would be like if `std::string(cons
 Nuff said.
 
 ### [Copyable and Movable Types](https://google.github.io/styleguide/cppguide.html#Copyable_Movable_Types)
-Lynchpin of C++ are value-types.
+The lynchpin of C++ are value-types.
 Such types should be copyable and moveable and the language automatically generates the necessary constructors and operators by default.
 "a copyable class should explicitly declare the copy operations, a move-only class should explicitly declare the move operations" -- this goes against the language philosophy.
 
@@ -194,8 +193,8 @@ It shouldn't cease being copyable.
 
 ### [Inheritance](https://google.github.io/styleguide/cppguide.html#Inheritance)
 "All inheritance should be public. If you want to do private inheritance, you should be including an instance of the base class as a member instead."
-Since private inheritance models "has-a" relationship and can often be replaced by a data member.
-In certain cases, this has serious disadvantages.
+Since private inheritance models "has-a" relationship, it can often be replaced by a data member.
+In certain cases it is not so.
 Here's an example:
 
 {% highlight c++ linenos %}
@@ -207,16 +206,16 @@ public:
   ...
 };
 
-class StaticStrWriter :
+class FixedStrWriter :
   private std::array<char, 100>,
   public StrWriter {
 public:
-  StaticStrWriter() : StrWriter(data()) {}
+  FixedStrWriter() : StrWriter(data()) {}
 };
 {% endraw %}
 {% endhighlight %}
 
-In this pattern (which comes up often), the private base cannot be replaced by a data member because the base is constructed before the members.
+In this pattern the private base cannot be replaced by a data member because the base is constructed before the members.
 
 "Multiple inheritance is permitted, but multiple _implementation_ inheritance is strongly discouraged."
 The guide cites performance issues with multiple inheritance as the reason to avoid it.
@@ -232,7 +231,7 @@ Ben Deane recently gave an excellent talk on the subject at CppCon: [Operator Ov
 
 I want to stress the importance of good notation, especially infix operators.
 The math notation we all know is a rather modern invention.
-For example, consider that in 628 AD, Brahmagupta, an Indian mathematician, gave the first explicit solution of the quadratic equation ax^2 + bx = c as follows: "To the absolute number multiplied by four times the [coefficient of the] square, add the square of the [coefficient of the] middle term; the square root of the same, less the [coefficient of the] middle term, being divided by twice the [coefficient of the] square is the value.
+For example, consider that in 628 AD, Brahmagupta, an Indian mathematician, gave the first explicit solution of the quadratic equation ax^2 + bx = c as follows: "To the absolute number multiplied by four times the [coefficient of the] square, add the square of the [coefficient of the] middle term; the square root of the same, less the [coefficient of the] middle term, being divided by twice the [coefficient of the] square is the value."
 Compare this to the quadratic formula written the way you learned it in school.
 
 Mathematicians, physicists, etc usually have the luxury of inventing new symbols or selecting from a wide range of available glyphs to denote operators.
@@ -269,7 +268,7 @@ What I find remarkable is that it offers no guideance on how to deal with errors
 ### [Lambda expressions](https://google.github.io/styleguide/cppguide.html#Exceptions)
 "Use lambda expressions where appropriate." -- probably a cheap shot, but what is the alternative? -- use them where it's not appropriate?
 
-### [Template metaprogramming](https://google.github.io/styleguide/cppguide.html#Template_metaprogramming)
+### [Template metaprogramming (TMP)](https://google.github.io/styleguide/cppguide.html#Template_metaprogramming)
 For the most part, GSG tries to scare anyone away from TMP.
 Unfortunately Google is not alone here as TMP is often frowned upon in many C++ circles.
 I have heard many opponents of TMP and their objections are almost always grounded in the fear of someone just using it to be clever.
@@ -282,11 +281,11 @@ I will assert that using an external script/compiler ends up being worse for a n
 * Crossing the boundary often requires going through a C interface
 * Having scripts that output C++ code are not easy to develop or maintain
 
-The use of a separate DSL does have advantages and can be justified if it will be a large part of the project.
-For example, a compiler writer may invest in setting up lex and yacc for more natural syntanx and more informative error messages.
+The use of a separate Domain Specific Language (DSL) does have advantages and can be justified if it will be a large part of the project.
+For example, a compiler writer may invest in setting up lex and yacc for more natural syntax and more informative error messages.
 However almost every project can benefit from a little DSL (e.g. to format dates or match a regular expression).
 The overhead of using a separate tool for such small tasks is probihitive.
-Embedded DSLs shine in this space and such EDSLs have to be implemented using TMP.
+Embedded DSLs shine in this space and have to be implemented using TMP.
 
 ### [Boost](https://google.github.io/styleguide/cppguide.html#Boost)
 GSG whitelists only a handful of Boost libraries on the fears that it might encourage the developers to learn and use "advanced techniques".
